@@ -1,57 +1,46 @@
 
-# # Assignment 3 - More Pandas
-# This assignment requires more individual learning then the last one did - you are encouraged to check out the [pandas documentation](http://pandas.pydata.org/pandas-docs/stable/) to find functions or methods you might not have used yet, or ask questions on [Stack Overflow](http://stackoverflow.com/) and tag them as pandas and python related. And of course, the discussion forums are open for interaction with your peers and the course staff.
-
-# ### Question 1 (20%)
-# Load the energy data from the file `Energy Indicators.xls`, which is a list of indicators of [energy supply and renewable electricity production](Energy%20Indicators.xls) from the [United Nations](http://unstats.un.org/unsd/environment/excel_file_tables/2013/Energy%20Indicators.xls) for the year 2013, and should be put into a DataFrame with the variable name of **energy**.
+# Energy data loded from the file `Energy Indicators.xls`, which is a list of indicators of [energy supply and renewable electricity production](Energy%20Indicators.xls) from the [United Nations](http://unstats.un.org/unsd/environment/excel_file_tables/2013/Energy%20Indicators.xls) for the year 2013, and put into a DataFrame with the variable name of **energy**.
 # 
 # Keep in mind that this is an Excel file, and not a comma separated values file. Also, make sure to exclude the footer and header information from the datafile. The first two columns are unneccessary, so you should get rid of them, and you should change the column labels so that the columns are:
 # 
 # `['Country', 'Energy Supply', 'Energy Supply per Capita', '% Renewable']`
 # 
-# Convert `Energy Supply` to gigajoules (there are 1,000,000 gigajoules in a petajoule). For all countries which have missing data (e.g. data with "...") make sure this is reflected as `np.NaN` values.
+# Converted `Energy Supply` to gigajoules (there are 1,000,000 gigajoules in a petajoule). For all countries which have missing data (e.g. data with "..."), this is reflected as `np.NaN` values.
 # 
-# Rename the following list of countries (for use in later questions):
+# Renamed the following list of countries (for use in later Parts):
 # 
 # ```"Republic of Korea": "South Korea",
 # "United States of America": "United States",
 # "United Kingdom of Great Britain and Northern Ireland": "United Kingdom",
 # "China, Hong Kong Special Administrative Region": "Hong Kong"```
 # 
-# There are also several countries with numbers and/or parenthesis in their name. Be sure to remove these, 
+# There are also several countries with numbers and/or parenthesis in their name. Removed these,
 # 
 # e.g. 
 # 
 # `'Bolivia (Plurinational State of)'` should be `'Bolivia'`, 
 # 
 # `'Switzerland17'` should be `'Switzerland'`.
+#
+# Next, loaded the GDP data from the file `world_bank.csv`, which is a csv containing countries' GDP from 1960 to 2015 from [World Bank](http://data.worldbank.org/indicator/NY.GDP.MKTP.CD). Called this DataFrame **GDP**.
 # 
-# <br>
-# 
-# Next, load the GDP data from the file `world_bank.csv`, which is a csv containing countries' GDP from 1960 to 2015 from [World Bank](http://data.worldbank.org/indicator/NY.GDP.MKTP.CD). Call this DataFrame **GDP**. 
-# 
-# Make sure to skip the header, and rename the following list of countries:
+# Skipped the header, and renamed the following list of countries:
 # 
 # ```"Korea, Rep.": "South Korea", 
 # "Iran, Islamic Rep.": "Iran",
 # "Hong Kong SAR, China": "Hong Kong"```
+#
+# Finally, loaded the [Sciamgo Journal and Country Rank data for Energy Engineering and Power Technology](http://www.scimagojr.com/countryrank.php?category=2102) from the file `scimagojr-3.xlsx`, which ranks countries based on their journal contributions in the aforementioned area. Called this DataFrame **ScimEn**.
+#
+# Joined the three datasets: GDP, Energy, and ScimEn into a new dataset (using the intersection of country names). Used only the last 10 years (2006-2015) of GDP data and only the top 15 countries by Scimagojr 'Rank' (Rank 1 through 15).
 # 
-# <br>
-# 
-# Finally, load the [Sciamgo Journal and Country Rank data for Energy Engineering and Power Technology](http://www.scimagojr.com/countryrank.php?category=2102) from the file `scimagojr-3.xlsx`, which ranks countries based on their journal contributions in the aforementioned area. Call this DataFrame **ScimEn**.
-# 
-# Join the three datasets: GDP, Energy, and ScimEn into a new dataset (using the intersection of country names). Use only the last 10 years (2006-2015) of GDP data and only the top 15 countries by Scimagojr 'Rank' (Rank 1 through 15). 
-# 
-# The index of this DataFrame should be the name of the country, and the columns should be ['Rank', 'Documents', 'Citable documents', 'Citations', 'Self-citations',
+# The index of this DataFrame is the name of the country, and the columns are ['Rank', 'Documents', 'Citable documents', 'Citations', 'Self-citations',
 #        'Citations per document', 'H index', 'Energy Supply',
 #        'Energy Supply per Capita', '% Renewable', '2006', '2007', '2008',
 #        '2009', '2010', '2011', '2012', '2013', '2014', '2015'].
-# 
-# *This function should return a DataFrame with 20 columns and 15 entries.*
-
-# In[2]:
 
 
+# ### Part 1
 import pandas as pd
 import numpy as np
 energy = pd.ExcelFile('Energy Indicators.xls').parse(skiprows=17,skip_footer=38
@@ -93,137 +82,87 @@ GDP.replace(to_replace={'Country Name':{"Korea, Rep.": "South Korea",
                                    "Iran, Islamic Rep.": "Iran",
                                    "Hong Kong SAR, China": "Hong Kong"}}, inplace=True)
 sci = pd.ExcelFile('scimagojr-3.xlsx').parse()
-def answer_one():
+def part_one():
     return pd.merge(pd.merge(sci[sci['Rank']<=15], energy, how='inner',left_on='Country',right_on='Country'),
                 GDP[['Country Name','2006', '2007', '2008','2009', '2010', '2011', '2012', '2013', '2014', '2015']],
                 how='inner', left_on='Country', right_on='Country Name').set_index('Country').drop('Country Name', axis=1)[:15]
 
+part_one()
 
-# ### Question 2 (6.6%)
-# The previous question joined three datasets then reduced this to just the top 15 entries. When you joined the datasets, but before you reduced this to the top 15 items, how many entries did you lose?
-# 
-# *This function should return a single number.*
+# ### 2
+# Previously, I joined three datasets then reduced this to just the top 15 entries. When I joined the datasets, but before I reduced this to the top 15 items, how many countries did I lose?
 
-# In[2]:
-
-
-get_ipython().run_cell_magic('HTML', '', '<svg width="800" height="300">\n  <circle cx="150" cy="180" r="80" fill-opacity="0.2" stroke="black" stroke-width="2" fill="blue" />\n  <circle cx="200" cy="100" r="80" fill-opacity="0.2" stroke="black" stroke-width="2" fill="red" />\n  <circle cx="100" cy="100" r="80" fill-opacity="0.2" stroke="black" stroke-width="2" fill="green" />\n  <line x1="150" y1="125" x2="300" y2="150" stroke="black" stroke-width="2" fill="black" stroke-dasharray="5,3"/>\n  <text  x="300" y="165" font-family="Verdana" font-size="35">Everything but this!</text>\n</svg>')
-
-
-# In[16]:
-
-
-def answer_two():
+def part_two():
     return int(pd.merge(sci, energy, how='outer', left_on='Country', right_on='Country')
-              .merge(GDP, how='outer', left_on='Country', right_on='Country Name').count()['Country'] - answer_one().index.size)
+              .merge(GDP, how='outer', left_on='Country', right_on='Country Name').count()['Country'] - part_one().index.size)
 
 
-# ## Answer the following questions in the context of only the top 15 countries by Scimagojr Rank (aka the DataFrame returned by `answer_one()`)
+part_two()
+# ## The following observations are in the context of only the top 15 countries by Scimagojr Rank (aka the DataFrame returned by `part_one()`)
 
-# ### Question 3 (6.6%)
-# What is the average GDP over the last 10 years for each country? (exclude missing values from this calculation.)
-# 
-# *This function should return a Series named `avgGDP` with 15 countries and their average GDP sorted in descending order.*
+# ### Part 3 
+# What is the average GDP over the last 10 years for each country? (excluded missing values from this calculation.)
 
-# In[4]:
-
-
-def answer_three():
-    Top15 = answer_one()
+def part_three():
+    Top15 = part_one()
     Top15['avg'] = Top15[['2006', '2007', '2008','2009', '2010', '2011', '2012', '2013', '2014', '2015']].mean(axis=1)
     return Top15['avg'].sort_values(ascending = False) 
 
-
-# ### Question 4 (6.6%)
+part_three()
+# ### Part 4
 # By how much had the GDP changed over the 10 year span for the country with the 6th largest average GDP?
-# 
-# *This function should return a single number.*
 
-# In[5]:
-
-
-def answer_four():
-    Top15 = answer_one()
-    Avg_6 = answer_three().index[5]
+def part_four():
+    Top15 = part_one()
+    Avg_6 = part_three().index[5]
     record = Top15[Top15.index.isin([Avg_6])]
     return (record['2015']-record['2006'])[0]
 
-
-# ### Question 5 (6.6%)
+part_four()
+# ### Part 5
 # What is the mean `Energy Supply per Capita`?
-# 
-# *This function should return a single number.*
 
-# In[6]:
-
-
-def answer_five():
-    Top15 = answer_one()
+def part_five():
+    Top15 = part_one()
     return Top15['Energy Supply per Capita'].mean()
 
-
-# ### Question 6 (6.6%)
+part_five()
+# ### Part 6
 # What country has the maximum % Renewable and what is the percentage?
-# 
-# *This function should return a tuple with the name of the country and the percentage.*
 
-# In[7]:
-
-
-def answer_six():
-    Top15 = answer_one()
+def part_six():
+    Top15 = part_one()
     df=Top15[Top15['% Renewable']==Top15['% Renewable'].max()]
     return (df.index[0], df.iloc[0]['% Renewable'])
 
-
-# ### Question 7 (6.6%)
-# Create a new column that is the ratio of Self-Citations to Total Citations. 
+part_six()
+# ### Part 7
 # What is the maximum value for this new column, and what country has the highest ratio?
-# 
-# *This function should return a tuple with the name of the country and the ratio.*
 
-# In[8]:
-
-
-def answer_seven():
-    Top15 = answer_one()
+def part_seven():
+    Top15 = part_one()
     Top15['ratio_self_total']=[(Top15['Self-citations'][n])/Top15['Citations'][n] 
                                                   for n in Top15.index]
     Top15 = Top15.sort_values(by='ratio_self_total', ascending=False)
     return (Top15.index[0], Top15.iloc[0]['ratio_self_total'])
 
+part_seven()
+# ### Part 8
+# What is the third most populous country according to Energy Supply per capita?
 
-# ### Question 8 (6.6%)
-# 
-# Create a column that estimates the population using Energy Supply and Energy Supply per capita. 
-# What is the third most populous country according to this estimate?
-# 
-# *This function should return a single string value.*
-
-# In[23]:
-
-
-def answer_eight():
-    Top15 = answer_one()
+def part_eight():
+    Top15 = part_one()
     Top15['pop_estimate']=[(Top15['Energy Supply'][n])/Top15['Energy Supply per Capita'][n] 
                                                   for n in Top15.index]
     Top15 = Top15.sort_values(by='pop_estimate', ascending=False)
     return Top15.index[2]
 
+part_eight()
+# ### Part 9 (6.6%)
+# What is the correlation between the number of citable documents per capita and the energy supply per capita? Used Pearson's correlation.
 
-# ### Question 9 (6.6%)
-# Create a column that estimates the number of citable documents per person. 
-# What is the correlation between the number of citable documents per capita and the energy supply per capita? Use the `.corr()` method, (Pearson's correlation).
-# 
-# *This function should return a single number.*
-# 
-# *(Optional: Use the built-in function `plot9()` to visualize the relationship between Energy Supply per Capita vs. Citable docs per Capita)*
-
-# In[10]:
-
-
-def answer_nine():
-    Top15 = answer_one()
+def part_nine():
+    Top15 = part_one()
     Top15['pop_estimate']=[(Top15['Energy Supply'][n])/Top15['Energy Supply per Capita'][n] 
                                                   for n in Top15.index]
     Top15['citable_docs_per_person']=[(Top15['Citable documents'][n])/Top15['pop_estimate'][n] 
@@ -231,47 +170,32 @@ def answer_nine():
     
     return Top15[['citable_docs_per_person','Energy Supply per Capita']].corr(method ='pearson')['citable_docs_per_person']['Energy Supply per Capita']
 
-
-# In[11]:
-
+part_nine()
 
 def plot9():
     import matplotlib as plt
     get_ipython().magic('matplotlib inline')
     
-    Top15 = answer_one()
+    Top15 = part_one()
     Top15['PopEst'] = Top15['Energy Supply'] / Top15['Energy Supply per Capita']
     Top15['Citable docs per Capita'] = Top15['Citable documents'] / Top15['PopEst']
     Top15.plot(x='Citable docs per Capita', y='Energy Supply per Capita', kind='scatter', xlim=[0, 0.0006])
 
+# ### Part 10
+# Created a new column with a 1 if the country's % Renewable value is at or above the median for all countries in the top 15, and a 0 if the country's % Renewable value is below the median.
 
-# In[12]:
-
-
-#plot9() # Be sure to comment out plot9() before submitting the assignment!
-
-
-# ### Question 10 (6.6%)
-# Create a new column with a 1 if the country's % Renewable value is at or above the median for all countries in the top 15, and a 0 if the country's % Renewable value is below the median.
-# 
-# *This function should return a series named `HighRenew` whose index is the country name sorted in ascending order of rank.*
-
-# In[13]:
-
-
-def answer_ten():
-    Top15 = answer_one()  
+def part_ten():
+    Top15 = part_one()  
     #print(Top15['% Renewable'].median())
     Top15['HighRenew']=[1 if Top15['% Renewable'][n]>=Top15['% Renewable'].median() else 0
                                                   for n in Top15.index]
     return Top15['HighRenew']
 
-
-# ### Question 11 (6.6%)
-# Use the following dictionary to group the Countries by Continent, then create a dateframe that displays the sample size (the number of countries in each continent bin), and the sum, mean, and std deviation for the estimated population of each country.
-# 
-# ```python
-# ContinentDict  = {'China':'Asia', 
+part_ten()
+# ### Part 11
+# Used the following dictionary to group the Countries by Continent, then create a dateframe that displays the sample size (the number of countries in each continent bin), and the sum, mean, and std deviation for the estimated population of each country.
+#
+# ContinentDict  = {'China':'Asia',
 #                   'United States':'North America', 
 #                   'Japan':'Asia', 
 #                   'United Kingdom':'Europe', 
@@ -286,15 +210,9 @@ def answer_ten():
 #                   'Iran':'Asia',
 #                   'Australia':'Australia', 
 #                   'Brazil':'South America'}
-# ```
-# 
-# *This function should return a DataFrame with index named Continent `['Asia', 'Australia', 'Europe', 'North America', 'South America']` and columns `['size', 'sum', 'mean', 'std']`*
 
-# In[30]:
-
-
-def answer_eleven():
-    Top15 = answer_one()
+def part_eleven():
+    Top15 = part_one()
     Top15['pop_estimate']=[(Top15['Energy Supply'][n])/Top15['Energy Supply per Capita'][n] 
                                                   for n in Top15.index]
     ContinentDict  = {'China':'Asia', 
@@ -322,17 +240,12 @@ def answer_eleven():
     all_joined_df.columns=['size', 'sum', 'mean', 'std']
     return all_joined_df
 
+part_eleven()
+# ### Part 12
+# Cut % Renewable into 5 bins. Grouped Top15 by the Continent, as well as these new % Renewable bins. How many countries are in each of these groups?
 
-# ### Question 12 (6.6%)
-# Cut % Renewable into 5 bins. Group Top15 by the Continent, as well as these new % Renewable bins. How many countries are in each of these groups?
-# 
-# *This function should return a __Series__ with a MultiIndex of `Continent`, then the bins for `% Renewable`. Do not include groups with no countries.*
-
-# In[35]:
-
-
-def answer_twelve():
-    Top15 = answer_one()
+def part_twelve():
+    Top15 = part_one()
     ContinentDict  = {'China':'Asia', 
                   'United States':'North America', 
                   'Japan':'Asia', 
@@ -354,37 +267,25 @@ def answer_twelve():
     size_renewable = df.join(Top15).groupby(['Continent', 'bins']).agg('size')
     return size_renewable
 
-
-# ### Question 13 (6.6%)
-# Convert the Population Estimate series to a string with thousands separator (using commas). Do not round the results.
-# 
-# e.g. 317615384.61538464 -> 317,615,384.61538464
-# 
-# *This function should return a Series `PopEst` whose index is the country name and whose values are the population estimate string.*
-
-# In[25]:
-
+part_twelve()
+# ### Part 13
+# Converted the Population Estimate series to a string with thousands separator (using commas).
 
 def f13(row):
     return "{:,}".format(row['PopEst'])
-def answer_thirteen():
-    Top15 = answer_one()
+def part_thirteen():
+    Top15 = part_one()
     Top15['PopEst'] =[(Top15['Energy Supply'][n])/Top15['Energy Supply per Capita'][n] 
                                                   for n in Top15.index]
     return Top15.apply(lambda row: f13(row), axis=1).rename('PopEst')
 
-
-# ### Optional
-# 
-# Use the built in function `plot_optional()` to see an example visualization.
-
-# In[17]:
+part_thirteen()
 
 
-def plot_optional():
+def plot_renewable_rank():
     import matplotlib as plt
     get_ipython().magic('matplotlib inline')
-    Top15 = answer_one()
+    Top15 = part_one()
     ax = Top15.plot(x='Rank', y='% Renewable', kind='scatter', 
                     c=['#e41a1c','#377eb8','#e41a1c','#4daf4a','#4daf4a','#377eb8','#4daf4a','#e41a1c',
                        '#4daf4a','#e41a1c','#4daf4a','#4daf4a','#e41a1c','#dede00','#ff7f00'], 
@@ -395,9 +296,4 @@ def plot_optional():
 
     print("This is an example of a visualization that can be created to help understand the data. This is a bubble chart showing % Renewable vs. Rank. The size of the bubble corresponds to the countries' 2014 GDP, and the color corresponds to the continent.")
 
-
-# In[18]:
-
-
-#plot_optional() # Be sure to comment out plot_optional() before submitting the assignment!
-
+plot_renewable_rank()
